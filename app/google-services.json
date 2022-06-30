@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "482908288042",
+    "project_id": "college-forum-app",
+    "storage_bucket": "college-forum-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482908288042:android:d4fc73d75b03741656bf53",
+        "android_client_info": {
+          "package_name": "com.example.college_forum_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "482908288042-24ddn1h4g7mrlta9t469mr664gcundlv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDV_07cjIS9GLwtCMgmPXFaAYdMNb5Nbxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "482908288042-24ddn1h4g7mrlta9t469mr664gcundlv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -16,19 +16,19 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-//import com.google.firebase.auth.FirebaseAuth;
-//import com.google.firebase.database.DataSnapshot;
-//import com.google.firebase.database.DatabaseError;
-//import com.google.firebase.database.DatabaseReference;
-//import com.google.firebase.database.FirebaseDatabase;
-//import com.google.firebase.database.ValueEventListener;
-//import com.google.firebase.messaging.Constants;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
     TextView frm, logo, name1, name2;
-//    FirebaseAuth Fauth;
-//    DatabaseReference databaseReference;
+    FirebaseAuth Fauth;
+    DatabaseReference databaseReference;
 
 
     @Override
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-/*        if (isOnline()) {
+        if (isOnline()) {
 
             load();
         } else {
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.d(Constants.TAG, "Show Dialog: " + e.getMessage());
             }
-        }*/
+        }
     }
 
     public boolean isOnline() {
@@ -85,13 +85,15 @@ public class MainActivity extends AppCompatActivity {
                 name2.animate().alpha(1f).setDuration(800);
             }
         });
-/*        new Handler().postDelayed(new Runnable() {
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 Fauth = FirebaseAuth.getInstance();
                 if (Fauth.getCurrentUser() != null) {
                     if (Fauth.getCurrentUser().isEmailVerified()) {
-                        Intent n = new Intent(MainActivity.this, Home.class);
+
+                        
+                        Intent n = new Intent(MainActivity.this, Login.class);
                         startActivity(n);
                         finish();
                     } else {
@@ -122,6 +124,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
-        },3000);*/
+        },3000);
     }
 }
