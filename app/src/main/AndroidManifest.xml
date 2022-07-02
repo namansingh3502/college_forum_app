@@ -4,6 +4,8 @@
     package="com.example.college_forum_app">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,6 +16,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.College_forum_app"
         tools:targetApi="31">
+
+
+        <activity android:name=".Registration" />
+        <activity android:name=".Login" />
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -23,7 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Login" />
 <!--        <activity android:name=".Registration" />-->
 
     </application>

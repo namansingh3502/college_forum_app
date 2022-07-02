@@ -8,7 +8,7 @@
 
     <!--*******TInstagram**********-->
     <TextView
-        android:id="@+id/instagram"
+        android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -23,13 +23,13 @@
 
     <!--*******email**********-->
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/login_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/login_email"
+        android:layout_below="@id/logo"
         android:layout_marginTop="15dp"
         android:paddingEnd="15dp"
-        android:paddingStart="15dp"
-        android:layout_below="@id/instagram">
+        android:paddingStart="15dp">
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -100,15 +100,15 @@
 
     <!--*******signup**********-->
     <TextView
+        android:id="@+id/signup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/signup"
-        android:text="Dont have an account? Sign up."
-        android:textSize="16sp"
-        android:textColor="@color/dark_purple"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal"
-        android:padding="15dp"/>
+        android:padding="15dp"
+        android:text="Dont have an account? Sign up."
+        android:textColor="@color/dark_purple"
+        android:textSize="16sp" />
 
 
 
