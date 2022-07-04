@@ -4,7 +4,7 @@
     package="com.example.college_forum_app">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -15,12 +15,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.College_forum_app"
-        tools:targetApi="31">
+        tools:targetApi="31"
+        android:usesCleartextTraffic="true">
 
 
         <activity android:name=".Registration" />
         <activity android:name=".Login" />
-
+        <activity android:name=".Post.PostActivity" />
+        <activity
+            android:name=".Home"
+            android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name=".MainActivity"

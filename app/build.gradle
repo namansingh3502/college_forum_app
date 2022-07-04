@@ -25,9 +25,32 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    configurations {
+        all { // You should exclude one of them not both of them
+            exclude group: "com.android.support", module: "support-core-ui"
+            exclude group: "com.android.support", module: "support-compat"
+        }
+    }
 }
 
 dependencies {
+
+    //CircleImageView
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    //Universal image loader Module
+    implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+
+    // Glide Module for profile image
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+
+    // Android-Networking module to maki api requests
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
+    // Jackson parser for parsing json
+    implementation 'com.amitshekhar.android:jackson-android-networking:1.0.2'
 
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'

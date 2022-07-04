@@ -8,6 +8,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -16,19 +17,19 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.Constants;
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONArrayRequestListener;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.jacksonandroidnetworking.JacksonParserFactory;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
     TextView frm, logo, name1, name2;
-    FirebaseAuth Fauth;
-    DatabaseReference databaseReference;
 
 
     @Override
@@ -36,25 +37,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (isOnline()) {
+        AndroidNetworking.initialize(getApplicationContext());
+        AndroidNetworking.setParserFactory(new JacksonParserFactory());
 
-            load();
-        } else {
-            try {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Error")
-                        .setMessage("Internet not available, Cross check your internet connectivity")
-                        .setCancelable(false)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                load();
-                            }
-                        }).show();
-            } catch (Exception e) {
-                Log.d(Constants.TAG, "Show Dialog: " + e.getMessage());
-            }
-        }
+        System.out.println("response success " );
+
+        AndroidNetworking.get("http://192.168.40.55:8000/api/auth/app")
+            .setPriority(Priority.LOW)
+            .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // do anything with response
+                        System.out.println("response success " + response);
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                    // handle error
+                    System.out.println("response error " + anError );
+                    }
+                });
+
+        load();
+
     }
 
     public boolean isOnline() {
@@ -88,7 +94,16 @@ public class MainActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Fauth = FirebaseAuth.getInstance();
+
+                Intent n = new Intent(MainActivity.this, Login.class);
+                startActivity(n);
+                finish();
+
+                SharedPreferences storage = getSharedPreferences("College_Forum", MODE_PRIVATE);
+                String auth_token = storage.getString("auth_token","No token");
+
+
+                /*Fauth = FirebaseAuth.getInstance();
                 if (Fauth.getCurrentUser() != null) {
                     if (Fauth.getCurrentUser().isEmailVerified()) {
 
@@ -121,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
 
-                }
+                }*/
 
             }
         },3000);
