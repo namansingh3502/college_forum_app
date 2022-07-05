@@ -190,17 +190,17 @@ public class Registration extends AppCompatActivity {
     //******************************FUNCTIONS TO ADD DATA'S TO FIREBASE*************************
     public void addUsers(String Discription, String FullName, String Username, String Website) {
 
-        Users user = new Users(
-                Discription,
-                "0",
-                "0",
-                FullName,
-                "0",
-                "https://firebasestorage.googleapis.com/v0/b/instagram-clone-291e7.appspot.com/o/generalProfilePhoto%2Fdefualt_insta_pic.png?alt=media&token=e9834979-a141-48fd-87b6-a2074e7dbc9b",
-                Username,
-                Website,
-                userid
-        );
+//        Users user = new Users(
+//                Discription,
+//                "0",
+//                "0",
+//                FullName,
+//                "0",
+//                "https://firebasestorage.googleapis.com/v0/b/instagram-clone-291e7.appspot.com/o/generalProfilePhoto%2Fdefualt_insta_pic.png?alt=media&token=e9834979-a141-48fd-87b6-a2074e7dbc9b",
+//                Username,
+//                Website,
+//                userid
+//        );
 //        databaseReference.child("Users").child(useridd).setValue(user);
     }
 

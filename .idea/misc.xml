@@ -16,9 +16,11 @@
         <entry key="app/src/main/res/layout/activity_user_search_profile.xml" value="0.23489583333333333" />
         <entry key="app/src/main/res/layout/activity_user_search_view_post.xml" value="0.23489583333333333" />
         <entry key="app/src/main/res/layout/activity_view_comments.xml" value="0.23489583333333333" />
-        <entry key="app/src/main/res/layout/fragment_home_post_viewer.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.35625" />
+        <entry key="app/src/main/res/layout/fragment_home_post_viewer.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.23489583333333333" />
         <entry key="app/src/main/res/layout/layout_each_comment.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/layout/layout_grid_imageview.xml" value="0.35625" />
         <entry key="app/src/main/res/layout/like_each_item_layout.xml" value="0.23489583333333333" />
         <entry key="app/src/main/res/layout/story_items.xml" value="0.23489583333333333" />
       </map>

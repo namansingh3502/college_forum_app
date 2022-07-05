@@ -1,8 +1,6 @@
 package com.example.college_forum_app.Utils;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -13,14 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -44,7 +39,6 @@ import com.example.college_forum_app.models.Comments;
 import com.example.college_forum_app.models.Likes;
 import com.example.college_forum_app.models.Photo;
 import com.example.college_forum_app.models.Users;
-import com.example.college_forum_app.models.privatedetails;
 
 public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Photo> {
 
@@ -77,7 +71,7 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Photo> {
         SquareImageView image;
         ImageView heartRed, heartWhite, comment;
 
-        Users settings = new Users();
+//        Users settings = new Users();
 //        privatedetails user  = new privatedetails();
         StringBuilder users;
 //        String mLikesString;
@@ -195,7 +189,7 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Photo> {
                         }
                     });
 
-                    imageLoader.displayImage(singleSnapshot.getValue(Users.class).getProfilePhoto(),
+                    imageLoader.displayImage(singleSnapshot.getValue(Users.class).getUser_image(),
                             holder.mprofileImage);
                     holder.mprofileImage.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -213,7 +207,7 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Photo> {
 
 
 
-                    holder.settings = singleSnapshot.getValue(Users.class);
+//                    holder.settings = singleSnapshot.getValue(Users.class);
                     holder.comment.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -314,7 +308,7 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Photo> {
 
                         //case1: Then user already liked the photo
                         if(mHolder.likeByCurrentUser &&
-                                singleSnapshot.getValue(Likes.class).getUser_id()
+                                singleSnapshot.getValue(Likes.class).getFull_name()
                                         .equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
 
                             mReference.child("Photo")
@@ -360,7 +354,7 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Photo> {
 
         String newLikeID = mReference.push().getKey();
         Likes like = new Likes();
-        like.setUser_id(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        like.setFull_name(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
         mReference.child("Photo")
                 .child(holder.photo.getPhoto_id())
@@ -423,7 +417,7 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Photo> {
                         Query query = reference
                                 .child("Users")
                                 .orderByChild("user_id")
-                                .equalTo(singleSnapshot.getValue(Likes.class).getUser_id());
+                                .equalTo(singleSnapshot.getValue(Likes.class).getFull_name());
                         query.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {

@@ -1,8 +1,9 @@
 package com.example.college_forum_app;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,7 +25,6 @@ import com.jacksonandroidnetworking.JacksonParserFactory;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Objects;
 
 public class Login extends AppCompatActivity {
@@ -61,42 +61,50 @@ public class Login extends AppCompatActivity {
                     if (isValid()) {
 
                         AndroidNetworking.post("http://192.168.40.55:8000/api/auth/token/login/")
-                            .addBodyParameter("username", username)
-                            .addBodyParameter("password", password)
-                            .setPriority(Priority.LOW)
-                            .build()
-                            .getAsJSONObject(new JSONObjectRequestListener() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    // do anything with response
+                                .addBodyParameter("username", username)
+                                .addBodyParameter("password", password)
+                                .setPriority(Priority.LOW)
+                                .build()
+                                .getAsJSONObject(new JSONObjectRequestListener() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
 
-                                    ObjectMapper objectMapper = new ObjectMapper();
-                                    AuthToken authToken = null;
-                                    try {
-                                        authToken = objectMapper.readValue(response.toString(), AuthToken.class);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                                        ObjectMapper objectMapper = new ObjectMapper();
+                                        AuthToken authToken = null;
+                                        try {
+                                            authToken = objectMapper.readValue(response.toString(), AuthToken.class);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        SharedPreferences sharedPreferences = getSharedPreferences("College_Forum", MODE_PRIVATE);
+                                        SharedPreferences.Editor myEdit = sharedPreferences.edit();
+
+                                        assert authToken != null;
+                                        myEdit.putString("auth_token", "Token " + authToken.getAuth_token());
+                                        myEdit.apply();
+
+                                        Intent z = new Intent(Login.this, Home.class);
+                                        startActivity(z);
+                                        finish();
+
                                     }
 
-                                    SharedPreferences sharedPreferences = getSharedPreferences("College_Forum",MODE_PRIVATE);
-                                    SharedPreferences.Editor myEdit = sharedPreferences.edit();
-
-                                    assert authToken != null;
-                                    myEdit.putString("auth_token", authToken.getAuth_token());
-                                    myEdit.apply();
-
-                                    Intent z = new Intent(Login.this, Home.class);
-                                    startActivity(z);
-                                    finish();
-
-                                }
-
-                                @Override
-                                public void onError(ANError anError) {
-                                    // handle error
-                                    System.out.println("Error "+ anError);
-                                }
-                            });
+                                    @Override
+                                    public void onError(ANError anError) {
+                                        // handle error
+                                        new AlertDialog.Builder(Login.this)
+                                                .setTitle("Error")
+                                                .setMessage("Username or Password incorrect.")
+                                                .setCancelable(false)
+                                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int which) {
+//                                                    load();
+                                                    }
+                                                }).show();
+                                    }
+                                });
                     }
                 }
             });

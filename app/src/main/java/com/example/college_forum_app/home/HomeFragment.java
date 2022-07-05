@@ -1,7 +1,9 @@
 package com.example.college_forum_app.home;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -19,21 +21,29 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.example.college_forum_app.models.AuthToken;
+import com.example.college_forum_app.models.Posts;
+import com.example.college_forum_app.models.Users;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jacksonandroidnetworking.JacksonParserFactory;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 
 import com.example.college_forum_app.Home;
 import com.example.college_forum_app.R;
@@ -42,80 +52,98 @@ import com.example.college_forum_app.Utils.UniversalImageLoader;
 import com.example.college_forum_app.models.Comments;
 import com.example.college_forum_app.models.Photo;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class HomeFragment extends Fragment {
 
     private static final String TAG = "HomeFragment";
 
-    //vars
-    private ArrayList<Photo> mPhotos;
+    private ArrayList<Posts> mPosts;
     private ArrayList<Photo> mPaginatedPhotos;
-    private ArrayList<String> mFollowing;
     private ListView mListView;
     private HomeFragmentPostViewListAdapter mAdapter;
     private int mResults;
     ImageView message;
 
 
-    private RecyclerView recyclerView_story;
-
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_home,null);
+        View v = inflater.inflate(R.layout.fragment_home, null);
         mListView = v.findViewById(R.id.FragmentHome_postListView);
-        mFollowing = new ArrayList<>();
-        mPhotos = new ArrayList<>();
+        ArrayList<String> mFollowing = new ArrayList<>();
+        mPosts = new ArrayList<>();
         mPaginatedPhotos = new ArrayList<>();
 
-        recyclerView_story = v.findViewById(R.id.FragmentHome_story_recyclerView);
-        recyclerView_story.setHasFixedSize(true);
-        LinearLayoutManager linearlayoutManager = new LinearLayoutManager(getContext(),
-                LinearLayoutManager.HORIZONTAL,false);
-        recyclerView_story.setLayoutManager(linearlayoutManager);
-
-
-        getFollowing();
-        initImageLoader();
-        displayMorePhotos();
-
+        loadPosts();
 
         return v;
     }
-    private void getFollowing(){
+
+    private void loadPosts() {
         Log.d(TAG, "getFollowing: searching for following");
 
-/*        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-        Query query = reference
-                .child("Following")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-                    Log.d(TAG, "onDataChange: found user: " +
-                            singleSnapshot.child("user_id").getValue());
+        SharedPreferences storage = this.requireActivity().getSharedPreferences("College_Forum", Context.MODE_PRIVATE);
+        String auth_token = storage.getString("auth_token", "No token");
 
-                    mFollowing.add(singleSnapshot.child("user_id").getValue().toString());
-                }
-                mFollowing.add(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                //get the photos
-                getPhotos();
-            }
+        AndroidNetworking.get("http://192.168.40.55:8000/api/forum/posts/10000")
+                .addHeaders("Authorization", "Token " + auth_token)
+                .setPriority(Priority.LOW)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        JSONArray arr = null;
+                        JSONObject post_obj, user_details, post_details, likes_details;
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                        try {
+                            arr = (JSONArray) response.get("posts");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
-            }
-        });*/
+                        for (int i = 0; i < arr.length(); i++) {
+                            try {
+
+                                ObjectMapper objectMapper = new ObjectMapper();
+
+                                post_obj = (JSONObject) arr.get(i);
+                                user_details = (JSONObject) post_obj.get("user");
+                                post_details = (JSONObject) post_obj.get("post");
+
+                                Posts post = new Posts();
+                                Users user = objectMapper.readValue(user_details.toString(), Users.class);
+
+                                post.setId((Integer) post_details.get("id"));
+                                post.setBody((String) post_details.get("body"));
+                                post.setTime((String) post_details.get("time"));
+                                post.setIs_edited((Boolean) post_details.get("is_edited"));
+
+                                post.setUser(user);
+                                mPosts.add(post);
+
+                            } catch (JSONException | IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        System.out.println("\n\nerror while getting post data\n\n");
+                    }
+                });
     }
+
 
     private void initImageLoader() {
         UniversalImageLoader universalImageLoader = new UniversalImageLoader(getActivity());
         ImageLoader.getInstance().init(universalImageLoader.getConfig());
     }
 
-    private void getPhotos(){
+    private void getPhotos() {
         Log.d(TAG, "getPhotos: getting photos");
 /*        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         for(int i = 0; i < mFollowing.size(); i++){
@@ -168,9 +196,9 @@ public class HomeFragment extends Fragment {
         }*/
     }
 
-    private void displayPhotos(){
-        if(mPhotos != null){
-            try{
+    private void displayPhotos() {
+       /* if (mPhotos != null) {
+            try {
                 Collections.sort(mPhotos, new Comparator<Photo>() {
                     @Override
                     public int compare(Photo o1, Photo o2) {
@@ -180,53 +208,53 @@ public class HomeFragment extends Fragment {
 
                 int iterations = mPhotos.size();
 
-                if(iterations > 10){
+                if (iterations > 10) {
                     iterations = 10;
                 }
 
                 mResults = 10;
-                for(int i = 0; i < iterations; i++){
+                for (int i = 0; i < iterations; i++) {
                     mPaginatedPhotos.add(mPhotos.get(i));
                 }
 
                 mAdapter = new HomeFragmentPostViewListAdapter(getActivity(), R.layout.fragment_home_post_viewer, mPaginatedPhotos);
                 mListView.setAdapter(mAdapter);
 
-            }catch (NullPointerException e){
-                Log.e(TAG, "displayPhotos: NullPointerException: " + e.getMessage() );
-            }catch (IndexOutOfBoundsException e){
-                Log.e(TAG, "displayPhotos: IndexOutOfBoundsException: " + e.getMessage() );
+            } catch (NullPointerException e) {
+                Log.e(TAG, "displayPhotos: NullPointerException: " + e.getMessage());
+            } catch (IndexOutOfBoundsException e) {
+                Log.e(TAG, "displayPhotos: IndexOutOfBoundsException: " + e.getMessage());
             }
-        }
+        }*/
     }
 
-    public void displayMorePhotos(){
-        Log.d(TAG, "displayMorePhotos: displaying more photos");
+    public void displayMorePhotos() {
+/*        Log.d(TAG, "displayMorePhotos: displaying more photos");
 
-        try{
+        try {
 
-            if(mPhotos.size() > mResults && mPhotos.size() > 0){
+            if (mPhotos.size() > mResults && mPhotos.size() > 0) {
 
                 int iterations;
-                if(mPhotos.size() > (mResults + 10)){
+                if (mPhotos.size() > (mResults + 10)) {
                     Log.d(TAG, "displayMorePhotos: there are greater than 10 more photos");
                     iterations = 10;
-                }else{
+                } else {
                     Log.d(TAG, "displayMorePhotos: there is less than 10 more photos");
                     iterations = mPhotos.size() - mResults;
                 }
 
                 //add the new photos to the paginated results
-                for(int i = mResults; i < mResults + iterations; i++){
+                for (int i = mResults; i < mResults + iterations; i++) {
                     mPaginatedPhotos.add(mPhotos.get(i));
                 }
                 mResults = mResults + iterations;
                 mAdapter.notifyDataSetChanged();
             }
-        }catch (NullPointerException e){
-            Log.e(TAG, "displayPhotos: NullPointerException: " + e.getMessage() );
-        }catch (IndexOutOfBoundsException e){
-            Log.e(TAG, "displayPhotos: IndexOutOfBoundsException: " + e.getMessage() );
-        }
+        } catch (NullPointerException e) {
+            Log.e(TAG, "displayPhotos: NullPointerException: " + e.getMessage());
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(TAG, "displayPhotos: IndexOutOfBoundsException: " + e.getMessage());
+        }*/
     }
 }

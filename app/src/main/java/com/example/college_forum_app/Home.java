@@ -10,9 +10,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.androidnetworking.AndroidNetworking;
 import com.example.college_forum_app.Post.PostActivity;
 import com.example.college_forum_app.home.HomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.jacksonandroidnetworking.JacksonParserFactory;
 
 //import com.example.college_forum_app.Like.LikeFragment;
 //import com.example.college_forum_app.Post.PostActivity;
@@ -27,18 +29,18 @@ public class Home extends AppCompatActivity implements BottomNavigationView.OnNa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         BottomNavigationView navigationView = findViewById(R.id.insta_bottom_navigation);
+
+        AndroidNetworking.initialize(getApplicationContext());
+        AndroidNetworking.setParserFactory(new JacksonParserFactory());
+
         navigationView.setOnNavigationItemSelectedListener(this);
         String name = getIntent().getStringExtra("PAGE");
-        if (name != null){
-            loadfragment(new HomeFragment());
 
-        }else{
-            loadfragment(new HomeFragment());
-
-        }
+        loadFragment(new HomeFragment());
 
     }
-    private boolean loadfragment(Fragment fragment) {
+
+    private boolean loadFragment(Fragment fragment) {
         if (fragment != null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
             return true;
@@ -65,7 +67,7 @@ public class Home extends AppCompatActivity implements BottomNavigationView.OnNa
 //                fragment = new com.example.college_forum_app.Profile.ProfileFragment();
 //                break;
         }
-        return loadfragment(fragment);
+        return loadFragment(fragment);
     }
 
     @Override
@@ -81,6 +83,4 @@ public class Home extends AppCompatActivity implements BottomNavigationView.OnNa
                 .setNegativeButton("No", null)
                 .show();
     }
-
-
 }

@@ -1,153 +1,61 @@
 package com.example.college_forum_app.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 
-public class Users implements Parcelable {
+public class Users {
 
-    private String Discription, Followers, Following, FullName, Posts, ProfilePhoto, Username, Website,User_id;
+    private String username, full_name, user_image, cover_photo;
+    private int id;
+
+    public Users(int id, String username, String full_name, String user_image, String cover_photo) {
+        this.id = id;
+        this.username = username;
+        this.full_name = full_name;
+        this.user_image = user_image;
+        this.cover_photo = cover_photo;
+    }
 
     public Users() {
     }
 
-    public Users(String discription, String followers, String following, String fullName, String posts, String profilePhoto, String username, String website, String user_id) {
-        Discription = discription;
-        Followers = followers;
-        Following = following;
-        FullName = fullName;
-        Posts = posts;
-        ProfilePhoto = profilePhoto;
-        Username = username;
-        Website = website;
-        User_id = user_id;
-    }
-
-    protected Users(Parcel in) {
-        Discription = in.readString();
-        Followers = in.readString();
-        Following = in.readString();
-        FullName = in.readString();
-        Posts = in.readString();
-        ProfilePhoto = in.readString();
-        Username = in.readString();
-        Website = in.readString();
-        User_id = in.readString();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(Discription);
-        dest.writeString(Followers);
-        dest.writeString(Following);
-        dest.writeString(FullName);
-        dest.writeString(Posts);
-        dest.writeString(ProfilePhoto);
-        dest.writeString(Username);
-        dest.writeString(Website);
-        dest.writeString(User_id);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<Users> CREATOR = new Creator<Users>() {
-        @Override
-        public Users createFromParcel(Parcel in) {
-            return new Users(in);
-        }
-
-        @Override
-        public Users[] newArray(int size) {
-            return new Users[size];
-        }
-    };
-
-    public String getDiscription() {
-        return Discription;
-    }
-
-    public void setDiscription(String discription) {
-        Discription = discription;
-    }
-
-    public String getFollowers() {
-        return Followers;
-    }
-
-    public void setFollowers(String followers) {
-        Followers = followers;
-    }
-
-    public String getFollowing() {
-        return Following;
-    }
-
-    public void setFollowing(String following) {
-        Following = following;
-    }
-
-    public String getFullName() {
-        return FullName;
-    }
-
-    public void setFullName(String fullName) {
-        FullName = fullName;
-    }
-
-    public String getPosts() {
-        return Posts;
-    }
-
-    public void setPosts(String posts) {
-        Posts = posts;
-    }
-
-    public String getProfilePhoto() {
-        return ProfilePhoto;
-    }
-
-    public void setProfilePhoto(String profilePhoto) {
-        ProfilePhoto = profilePhoto;
-    }
-
     public String getUsername() {
-        return Username;
+        return this.username;
     }
+
+    public String getFull_name() {
+        return this.full_name;
+    }
+
+    public String getUser_image() {
+        return this.user_image;
+    }
+
+    public String getCover_photo() {
+        return this.cover_photo;
+    }
+
+    public Integer getId() {
+        return this.id;
+    }
+
 
     public void setUsername(String username) {
-        Username = username;
+        this.username = username;
     }
 
-    public String getWebsite() {
-        return Website;
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
     }
 
-    public void setWebsite(String website) {
-        Website = website;
+    public void setUser_image(String user_image) {
+        this.user_image = user_image;
     }
 
-    public String getUser_id() {
-        return User_id;
+    public void setCover_photo(String cover_photo) {
+        this.cover_photo = cover_photo;
     }
 
-    public void setUser_id(String user_id) {
-        User_id = user_id;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    @Override
-    public String toString() {
-        return "Users{" +
-                "Discription='" + Discription + '\'' +
-                ", Followers='" + Followers + '\'' +
-                ", Following='" + Following + '\'' +
-                ", FullName='" + FullName + '\'' +
-                ", Posts='" + Posts + '\'' +
-                ", ProfilePhoto='" + ProfilePhoto + '\'' +
-                ", Username='" + Username + '\'' +
-                ", Website='" + Website + '\'' +
-                ", User_id='" + User_id + '\'' +
-                '}';
-    }
 }
