@@ -1,56 +1,40 @@
 package com.example.college_forum_app.home;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
-import com.example.college_forum_app.models.AuthToken;
+import com.example.college_forum_app.models.ChannelTags;
+import com.example.college_forum_app.models.Image;
+import com.example.college_forum_app.models.Likes;
 import com.example.college_forum_app.models.Posts;
 import com.example.college_forum_app.models.Users;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jacksonandroidnetworking.JacksonParserFactory;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 
-import com.example.college_forum_app.Home;
 import com.example.college_forum_app.R;
 import com.example.college_forum_app.Utils.HomeFragmentPostViewListAdapter;
 import com.example.college_forum_app.Utils.UniversalImageLoader;
-import com.example.college_forum_app.models.Comments;
-import com.example.college_forum_app.models.Photo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,10 +45,11 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
 
     private ArrayList<Posts> mPosts;
-    private ArrayList<Photo> mPaginatedPhotos;
+    private ArrayList<ChannelTags> mChannelTags;
+    private ArrayList<Posts> mPaginatedPosts;
+    private ArrayList<Likes> mLikes;
     private ListView mListView;
-    private HomeFragmentPostViewListAdapter mAdapter;
-    private int mResults;
+    private ArrayList<String> mImagePaths;
     ImageView message;
 
 
@@ -73,11 +58,12 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_home, null);
         mListView = v.findViewById(R.id.FragmentHome_postListView);
-        ArrayList<String> mFollowing = new ArrayList<>();
         mPosts = new ArrayList<>();
-        mPaginatedPhotos = new ArrayList<>();
+        mPaginatedPosts = new ArrayList<>();
+        ArrayList<String> mFollowing = new ArrayList<>();
 
         loadPosts();
+        initImageLoader();
 
         return v;
     }
@@ -88,15 +74,16 @@ public class HomeFragment extends Fragment {
         SharedPreferences storage = this.requireActivity().getSharedPreferences("College_Forum", Context.MODE_PRIVATE);
         String auth_token = storage.getString("auth_token", "No token");
 
-        AndroidNetworking.get("http://192.168.40.55:8000/api/forum/posts/10000")
-                .addHeaders("Authorization", "Token " + auth_token)
+        AndroidNetworking.get("http://192.168.40.254:8000/api/forum/posts/10000")
+                .addHeaders("Authorization", auth_token)
                 .setPriority(Priority.LOW)
                 .build()
                 .getAsJSONObject(new JSONObjectRequestListener() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        JSONArray arr = null;
-                        JSONObject post_obj, user_details, post_details, likes_details;
+                        JSONArray arr = null, channel_tag_details = null, like_details = null, image_details = null;
+                        JSONObject post_obj, user_details, post_details;
+
 
                         try {
                             arr = (JSONArray) response.get("posts");
@@ -106,12 +93,16 @@ public class HomeFragment extends Fragment {
 
                         for (int i = 0; i < arr.length(); i++) {
                             try {
-
                                 ObjectMapper objectMapper = new ObjectMapper();
 
                                 post_obj = (JSONObject) arr.get(i);
+
                                 user_details = (JSONObject) post_obj.get("user");
                                 post_details = (JSONObject) post_obj.get("post");
+                                image_details = (JSONArray) post_obj.get("media");
+
+                                channel_tag_details = (JSONArray) post_details.get("posted_in");
+                                like_details = (JSONArray) post_details.get("likes");
 
                                 Posts post = new Posts();
                                 Users user = objectMapper.readValue(user_details.toString(), Users.class);
@@ -121,13 +112,36 @@ public class HomeFragment extends Fragment {
                                 post.setTime((String) post_details.get("time"));
                                 post.setIs_edited((Boolean) post_details.get("is_edited"));
 
+                                mChannelTags = new ArrayList<>();
+                                for (int j = 0; j < channel_tag_details.length(); j++) {
+                                    ChannelTags channelTags = objectMapper.readValue(channel_tag_details.get(j).toString(), ChannelTags.class);
+                                    mChannelTags.add(channelTags);
+                                }
+
+                                mLikes = new ArrayList<Likes>();
+                                for (int j = 0; j < like_details.length(); j++) {
+                                    Likes like = objectMapper.readValue(like_details.get(j).toString(), Likes.class);
+                                    mLikes.add(like);
+                                }
+
+                                mImagePaths = new ArrayList<String>();
+                                for (int j=0; j < image_details.length(); j++){
+                                    Image image = objectMapper.readValue(image_details.get(j).toString(), Image.class);
+                                    mImagePaths.add(image.getFile());
+                                }
+
+                                post.setImage_urls(mImagePaths);
+                                post.setPosted_in(mChannelTags);
+                                post.setLikes(mLikes);
                                 post.setUser(user);
+
                                 mPosts.add(post);
 
                             } catch (JSONException | IOException e) {
                                 e.printStackTrace();
                             }
                         }
+                        displayPosts();
                     }
 
                     @Override
@@ -137,87 +151,26 @@ public class HomeFragment extends Fragment {
                 });
     }
 
+    void displayPosts() {
+        Log.e(TAG, "\n\ndisplayPosts: Display posts");
 
-    private void initImageLoader() {
-        UniversalImageLoader universalImageLoader = new UniversalImageLoader(getActivity());
-        ImageLoader.getInstance().init(universalImageLoader.getConfig());
-    }
+        if (mPosts != null) {
 
-    private void getPhotos() {
-        Log.d(TAG, "getPhotos: getting photos");
-/*        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-        for(int i = 0; i < mFollowing.size(); i++){
-            final int count = i;
-            Query query = reference
-                    .child("User_Photo")
-                    .child(mFollowing.get(i))
-                    .orderByChild("user_id")
-                    .equalTo(mFollowing.get(i));
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-
-                        Photo photo = new Photo();
-                        Map<String, Object> objectMap = (HashMap<String, Object>) singleSnapshot.getValue();
-
-                        photo.setCaption(objectMap.get("caption").toString());
-                        photo.setTags(objectMap.get("tags").toString());
-                        photo.setPhoto_id(objectMap.get("photo_id").toString());
-                        photo.setUser_id(objectMap.get("user_id").toString());
-                        photo.setDate_Created(objectMap.get("date_Created").toString());
-                        photo.setImage_Path(objectMap.get("image_Path").toString());
-
-
-                        ArrayList<Comments> comments = new ArrayList<Comments>();
-                        for (DataSnapshot dSnapshot : singleSnapshot
-                                .child("comments").getChildren()){
-                            Comments comment = new Comments();
-                            comment.setUser_id(dSnapshot.getValue(Comments.class).getUser_id());
-                            comment.setComment(dSnapshot.getValue(Comments.class).getComment());
-                            comment.setDate_created(dSnapshot.getValue(Comments.class).getDate_created());
-                            comments.add(comment);
-                        }
-
-                        photo.setComments(comments);
-                        mPhotos.add(photo);
-                    }
-                    if(count >= mFollowing.size() -1){
-                        //display our photos
-                        displayPhotos();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }*/
-    }
-
-    private void displayPhotos() {
-       /* if (mPhotos != null) {
             try {
-                Collections.sort(mPhotos, new Comparator<Photo>() {
-                    @Override
-                    public int compare(Photo o1, Photo o2) {
-                        return o2.getDate_Created().compareTo(o1.getDate_Created());
-                    }
-                });
 
-                int iterations = mPhotos.size();
+                int iteration = mPosts.size();
 
-                if (iterations > 10) {
-                    iterations = 10;
+                if (iteration > 10) {
+                    iteration = 10;
                 }
 
-                mResults = 10;
-                for (int i = 0; i < iterations; i++) {
-                    mPaginatedPhotos.add(mPhotos.get(i));
+                int mResults = 10;
+
+                for (int i = 0; i < iteration; i++) {
+                    mPaginatedPosts.add(mPosts.get(i));
                 }
 
-                mAdapter = new HomeFragmentPostViewListAdapter(getActivity(), R.layout.fragment_home_post_viewer, mPaginatedPhotos);
+                HomeFragmentPostViewListAdapter mAdapter = new HomeFragmentPostViewListAdapter(requireActivity(), R.layout.fragment_home_post_viewer, mPaginatedPosts);
                 mListView.setAdapter(mAdapter);
 
             } catch (NullPointerException e) {
@@ -225,7 +178,13 @@ public class HomeFragment extends Fragment {
             } catch (IndexOutOfBoundsException e) {
                 Log.e(TAG, "displayPhotos: IndexOutOfBoundsException: " + e.getMessage());
             }
-        }*/
+        }
+    }
+
+
+    private void initImageLoader() {
+        UniversalImageLoader universalImageLoader = new UniversalImageLoader(getActivity());
+        ImageLoader.getInstance().init(universalImageLoader.getConfig());
     }
 
     public void displayMorePhotos() {

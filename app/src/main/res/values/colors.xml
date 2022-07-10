@@ -26,4 +26,6 @@
     <color name="sky_blue">#007cf7</color>
     <color name="dark_purple">#23002b</color>
     <color name="red">#FA2516</color>
+    <color name="bgPrimary">#011627</color>
+
 </resources>

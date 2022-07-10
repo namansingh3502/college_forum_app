@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 } else {
 
-                    AndroidNetworking.get("http://192.168.40.55:8000/api/auth/users/me/")
-                            .addHeaders("Authorization", "Token " + auth_token)
+                    AndroidNetworking.get("http://192.168.40.254:8000/api/auth/users/me/")
+                            .addHeaders("Authorization", auth_token)
                             .setPriority(Priority.LOW)
                             .build()
                             .getAsJSONObject(new JSONObjectRequestListener() {

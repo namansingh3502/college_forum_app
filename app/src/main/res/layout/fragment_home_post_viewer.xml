@@ -1,173 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/bgPrimary">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/white">
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/white"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:orientation="horizontal"
-                android:layout_marginBottom="4dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginStart="13dp"
-                android:layout_marginEnd="15dp">
+                android:layout_marginBottom="4dp"
+                android:orientation="horizontal">
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/fragment_home_post_viewer_user_img"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
                     app:civ_border_color="@color/instacenterclord"
-                    app:civ_border_width="0.5dp"
-                    android:layout_gravity="center_vertical"/>
+                    app:civ_border_width="0.5dp" />
 
                 <TextView
                     android:id="@+id/fragment_home_post_viewer_username"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:text="Username"
-                    android:textStyle="bold"
                     android:textColor="@color/black"
                     android:textSize="16sp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:layout_marginStart="10dp"/>
-
-                <ImageView
-                    android:id="@+id/fragment_home_post_viewer_option"
-                    android:layout_width="20dp"
-                    android:layout_height="40dp"
-                    app:srcCompat="@drawable/menu"
-                    app:tint="@color/textcolor"
-                    android:layout_gravity="center_vertical"/>
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <com.example.college_forum_app.Utils.SquareImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/fragment_home_post_viewer_post_image"
-                android:scaleType="centerCrop"/>
+            <!--            <TextView-->
+            <!--                android:id="@+id/seperator1"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="1dp"-->
+            <!--                android:background="@color/black" />-->
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="13dp">
+                android:padding="4dp">
 
-                <RelativeLayout
+                <TextView
+                    android:id="@+id/fragment_home_post_viewer_txt_tags"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/fragment_home_post_viewer_img_heart"
-                        android:src="@drawable/heart"
-                        android:visibility="visible"
-                        android:layout_centerInParent="true"/>
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/fragment_home_post_viewer_img_heart_red"
-                        android:src="@drawable/redheart"
-                        android:visibility="invisible"
-                        android:layout_centerInParent="true"/>
-                </RelativeLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:text="#Channels"
+                    android:textColor="#3648AC"
+                    android:textSize="14sp" />
 
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/fragment_home_post_viewer_img_comments"
-                    android:src="@drawable/comments" />
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/fragment_home_post_viewer_img_send"
-                    android:src="@drawable/send"/>
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="end">
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/fragment_home_post_viewer_img_save"
-                        android:src="@drawable/save"/>
+            </LinearLayout>
 
-                </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:paddingTop="4dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:id="@+id/fragment_home_post_viewer_body"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+
+            <!--            <com.example.college_forum_app.Utils.SquareImageView
+                android:id="@+id/fragment_home_post_viewer_post_image"
+                android:layout_width="match_parent"
+                android:layout_height="347dp"
+                android:visibility="invisible" />-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:paddingTop="4dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:id="@+id/fragment_home_post_viewer_txt_likes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:text="liked by you, Naman Singh and 9 others"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/fragment_home_post_viewer_txt_likes"
-                android:text="Likes"
-                android:textColor="@color/black"
-                android:textSize="13sp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/fragment_home_post_viewer_txt_caption"
-                android:text="Caption"
-                android:textColor="@color/black"
-                android:textSize="13sp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginTop="5dp"/>
+                android:id="@+id/seperator2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@color/black" />
 
-            <TextView
-                android:id="@+id/fragment_home_post_viewer_txt_tags"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:text="Tags"
-                android:textColor="#3648AC"
-                android:textSize="13sp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/fragment_home_post_viewer_txt_commments"
-                android:text="Comments"
-                android:textColor="@color/lightgray"
-                android:textSize="14sp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/fragment_home_post_viewer_txt_timePosted"
-                android:text="0 days ago"
-                android:textColor="@color/lightgray"
-                android:textSize="10sp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp">
 
 
+                <Button
+                    android:id="@+id/fragment_home_post_viewer_like_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginRight="4dp"
+                    android:backgroundTint="@color/button_background_color"
+                    android:text="Like"
+                    android:textAllCaps="false"
+                    android:textColor="@color/button_text_color" />
 
-
+                <Button
+                    android:id="@+id/fragment_home_post_viewer_comment_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginRight="4dp"
+                    android:backgroundTint="@color/button_background_color"
+                    android:text="Comment"
+                    android:textAllCaps="false"
+                    android:textColor="@color/button_text_color" />
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
 
-<!--    <ProgressBar-->
-<!--        android:layout_width="80dp"-->
-<!--        android:layout_height="80dp"-->
-<!--        android:id="@+id/fragment_home_post_viewer_ProgressBar"-->
-<!--        android:layout_centerInParent="true"/>-->
+    <!--    <ProgressBar-->
+    <!--        android:layout_width="80dp"-->
+    <!--        android:layout_height="80dp"-->
+    <!--        android:id="@+id/fragment_home_post_viewer_ProgressBar"-->
+    <!--        android:layout_centerInParent="true"/>-->
 
 
 </RelativeLayout>
