@@ -16,12 +16,6 @@ import com.example.college_forum_app.home.HomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jacksonandroidnetworking.JacksonParserFactory;
 
-//import com.example.college_forum_app.Like.LikeFragment;
-//import com.example.college_forum_app.Post.PostActivity;
-//import com.example.college_forum_app.Profile.ProfileFragment;
-//import com.example.college_forum_app.Search.SearchFragment;
-//import com.example.college_forum_app.home.HomeFragment;
-
 public class Home extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     @Override

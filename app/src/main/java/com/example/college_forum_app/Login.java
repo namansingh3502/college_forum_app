@@ -43,79 +43,71 @@ public class Login extends AppCompatActivity {
         AndroidNetworking.initialize(getApplicationContext());
         AndroidNetworking.setParserFactory(new JacksonParserFactory());
 
-        CreateAccount = (TextView) findViewById(R.id.signup);
+        CreateAccount = findViewById(R.id.signup);
 
         try {
-            Username = (TextInputLayout) findViewById(R.id.login_email);
-            Pass = (TextInputLayout) findViewById(R.id.login_password);
-            login = (Button) findViewById(R.id.Login_btn);
-            ForgotPassword = (TextView) findViewById(R.id.forgotpass);
+            Username = findViewById(R.id.login_email);
+            Pass = findViewById(R.id.login_password);
+            login = findViewById(R.id.Login_btn);
+            ForgotPassword = findViewById(R.id.forgotpass);
 
 
-            login.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            login.setOnClickListener(v -> {
 
-                    username = Objects.requireNonNull(Username.getEditText()).getText().toString().trim();
-                    password = Objects.requireNonNull(Pass.getEditText()).getText().toString().trim();
-                    if (isValid()) {
+                username = Objects.requireNonNull(Username.getEditText()).getText().toString().trim();
+                password = Objects.requireNonNull(Pass.getEditText()).getText().toString().trim();
+                if (isValid()) {
 
-                        AndroidNetworking.post("http://192.168.40.55:8000/api/auth/token/login/")
-                                .addBodyParameter("username", username)
-                                .addBodyParameter("password", password)
-                                .setPriority(Priority.LOW)
-                                .build()
-                                .getAsJSONObject(new JSONObjectRequestListener() {
-                                    @Override
-                                    public void onResponse(JSONObject response) {
+                    AndroidNetworking.post("http://192.168.40.254:8000/api/auth/token/login/")
+                            .addBodyParameter("username", username)
+                            .addBodyParameter("password", password)
+                            .setPriority(Priority.LOW)
+                            .build()
+                            .getAsJSONObject(new JSONObjectRequestListener() {
+                                @Override
+                                public void onResponse(JSONObject response) {
 
-                                        ObjectMapper objectMapper = new ObjectMapper();
-                                        AuthToken authToken = null;
-                                        try {
-                                            authToken = objectMapper.readValue(response.toString(), AuthToken.class);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                        SharedPreferences sharedPreferences = getSharedPreferences("College_Forum", MODE_PRIVATE);
-                                        SharedPreferences.Editor myEdit = sharedPreferences.edit();
-
-                                        assert authToken != null;
-                                        myEdit.putString("auth_token", "Token " + authToken.getAuth_token());
-                                        myEdit.apply();
-
-                                        Intent z = new Intent(Login.this, Home.class);
-                                        startActivity(z);
-                                        finish();
-
+                                    ObjectMapper objectMapper = new ObjectMapper();
+                                    AuthToken authToken = null;
+                                    try {
+                                        authToken = objectMapper.readValue(response.toString(), AuthToken.class);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
                                     }
 
-                                    @Override
-                                    public void onError(ANError anError) {
-                                        // handle error
-                                        new AlertDialog.Builder(Login.this)
-                                                .setTitle("Error")
-                                                .setMessage("Username or Password incorrect.")
-                                                .setCancelable(false)
-                                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
+                                    SharedPreferences sharedPreferences = getSharedPreferences("College_Forum", MODE_PRIVATE);
+                                    SharedPreferences.Editor myEdit = sharedPreferences.edit();
+
+                                    assert authToken != null;
+                                    myEdit.putString("auth_token", "Token " + authToken.getAuth_token());
+                                    myEdit.apply();
+
+                                    Intent z = new Intent(Login.this, Home.class);
+                                    startActivity(z);
+                                    finish();
+
+                                }
+
+                                @Override
+                                public void onError(ANError anError) {
+                                    // handle error
+                                    new AlertDialog.Builder(Login.this)
+                                            .setTitle("Error")
+                                            .setMessage("Username or Password incorrect.")
+                                            .setCancelable(false)
+                                            .setIcon(android.R.drawable.ic_dialog_alert)
+                                            .setNeutralButton("OK", (dialog, which) -> {
 //                                                    load();
-                                                    }
-                                                }).show();
-                                    }
-                                });
-                    }
+                                            }).show();
+                                }
+                            });
                 }
             });
 
-            CreateAccount.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(Login.this, Registration.class);
-                    startActivity(intent);
-                    finish();
-                }
+            CreateAccount.setOnClickListener(v -> {
+                Intent intent = new Intent(Login.this, Registration.class);
+                startActivity(intent);
+                finish();
             });
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();

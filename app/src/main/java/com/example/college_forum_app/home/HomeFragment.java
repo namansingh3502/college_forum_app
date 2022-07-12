@@ -1,6 +1,7 @@
 package com.example.college_forum_app.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.example.college_forum_app.Profile.Account_Settings;
 import com.example.college_forum_app.models.ChannelTags;
 import com.example.college_forum_app.models.Image;
 import com.example.college_forum_app.models.Likes;
@@ -29,7 +31,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 
 import com.example.college_forum_app.R;
@@ -50,7 +51,7 @@ public class HomeFragment extends Fragment {
     private ArrayList<Likes> mLikes;
     private ListView mListView;
     private ArrayList<String> mImagePaths;
-    ImageView message;
+    ImageView account_setting_menu;
 
 
     @Nullable
@@ -61,6 +62,12 @@ public class HomeFragment extends Fragment {
         mPosts = new ArrayList<>();
         mPaginatedPosts = new ArrayList<>();
         ArrayList<String> mFollowing = new ArrayList<>();
+
+        account_setting_menu = v.findViewById(R.id.accountSettingMenu);
+        account_setting_menu.setOnClickListener(v1 -> {
+            Intent intent =new Intent(getActivity(),Account_Settings.class);
+            startActivity(intent);
+        });
 
         loadPosts();
         initImageLoader();
@@ -83,7 +90,6 @@ public class HomeFragment extends Fragment {
                     public void onResponse(JSONObject response) {
                         JSONArray arr = null, channel_tag_details = null, like_details = null, image_details = null;
                         JSONObject post_obj, user_details, post_details;
-
 
                         try {
                             arr = (JSONArray) response.get("posts");
