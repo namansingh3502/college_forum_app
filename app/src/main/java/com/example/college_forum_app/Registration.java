@@ -2,34 +2,33 @@ package com.example.college_forum_app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.example.college_forum_app.Post.PostActivity;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.util.Calendar;
-
-import com.example.college_forum_app.models.Passwords;
-import com.example.college_forum_app.models.Users;
-import com.example.college_forum_app.models.privatedetails;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Registration extends AppCompatActivity {
 
-    TextView alreadyhaveacc;
-    TextInputLayout Fname, Username, Email, Pass, Mobileno, Gender;
-    EditText Birth;
-    int year, month, day;
+    TextView already_have_account;
+    TextInputLayout First_name, Middle_name, Last_name, Username, Email, Pass1, Pass2, Mobile;
+    String username, pass1, pass2, first_name, middle_name = "", last_name, email, mobile, gender;
+
     Button register;
-    String fname, username, email, pass, mobileno, gender, birth, userid;
     AnimationDrawable anim;
 
     @Override
@@ -37,20 +36,23 @@ public class Registration extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
-        alreadyhaveacc = (TextView) findViewById(R.id.AlreadyHavesignin);
-        Birth = (EditText) findViewById(R.id.birthdate);
-        Fname = (TextInputLayout) findViewById(R.id.Fullname);
-        Username = (TextInputLayout) findViewById(R.id.Username);
-        Email = (TextInputLayout) findViewById(R.id.signup_email);
-        Pass = (TextInputLayout) findViewById(R.id.signup_password);
-        Gender = (TextInputLayout) findViewById(R.id.gender);
-        Mobileno = (TextInputLayout) findViewById(R.id.mobilenoo);
+        already_have_account = findViewById(R.id.AlreadyHavesignin);
 
+        Username = findViewById(R.id.Username);
+        Pass1 = findViewById(R.id.password);
+        Pass2 = findViewById(R.id.re_enter_password);
+        First_name = findViewById(R.id.First_name);
+        Middle_name = findViewById(R.id.Middle_name);
+        Last_name = findViewById(R.id.Last_name);
+        Email = findViewById(R.id.email);
+        Mobile = findViewById(R.id.mobilenoo);
+//        Gender = (TextInputLayout) findViewById(R.id.gender);
+//        Department = (TextInputLayout) findViewById(R.id.department);
 
         register = (Button) findViewById(R.id.signup_button);
 
 //******************************BACKGROUND ANIMATION*************************
-        RelativeLayout container = (RelativeLayout) findViewById(R.id.relative_registration);
+        RelativeLayout container = findViewById(R.id.relative_registration);
 
         anim = (AnimationDrawable) container.getBackground();
         anim.setEnterFadeDuration(6000);
@@ -58,25 +60,7 @@ public class Registration extends AppCompatActivity {
 
 //******************************BACKGROUND ANIMATION*************************
 
-
-        Birth.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Calendar calendar = Calendar.getInstance();
-                year = calendar.get(Calendar.YEAR);
-                month = calendar.get(Calendar.MONTH);
-                day = calendar.get(Calendar.DAY_OF_MONTH);
-                DatePickerDialog datePickerDialog = new DatePickerDialog(Registration.this, new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        Birth.setText(dayOfMonth + "/" + (month + 1) + "/" + year);
-                    }
-                }, year, month, day);
-                datePickerDialog.show();
-            }
-        });
-
-        alreadyhaveacc.setOnClickListener(new View.OnClickListener() {
+        already_have_account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Registration.this, Login.class);
@@ -89,52 +73,118 @@ public class Registration extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                fname = Fname.getEditText().getText().toString().trim();
                 username = Username.getEditText().getText().toString().trim();
+                pass1 = Pass1.getEditText().getText().toString().trim();
+                pass2 = Pass2.getEditText().getText().toString().trim();
+                first_name = First_name.getEditText().getText().toString().trim();
+                middle_name = Middle_name.getEditText().getText().toString().trim();
+                last_name = Last_name.getEditText().getText().toString().trim();
                 email = Email.getEditText().getText().toString().trim();
-                mobileno = Mobileno.getEditText().getText().toString().trim();
-                pass = Pass.getEditText().getText().toString().trim();
-                gender = Gender.getEditText().getText().toString().trim();
-                birth = Birth.getText().toString().trim();
+                mobile = Mobile.getEditText().getText().toString().trim();
+
+//                gender = Gender.getEditText().getText().toString().trim();
+//                department = Department.getEditText().getText().toString().trim();
 
                 if (isValid()) {
-                    System.out.println("fname "+ fname);
-                    System.out.println("uname "+ username);
-                    System.out.println("email "+ email);
-                    System.out.println("mobile "+ mobileno);
-                    System.out.println("pass "+ pass);
-                    System.out.println("gender "+ gender);
-                    System.out.println("birth "+ birth);
 
-                    System.out.println("Registered successfully");
+                    JSONObject data = new JSONObject();
+                    JSONObject gender = new JSONObject();
+                    JSONObject department = new JSONObject();
+
+                    try {
+                        gender.put("value", "M");
+                        gender.put("label", "Male");
+                        department.put("value", "CSE");
+                        department.put("label", "Computer Science and Engineering");
+
+                        data.put("username", username);
+                        data.put("password1", pass1);
+                        data.put("password2", pass2);
+                        data.put("first_name", first_name);
+                        data.put("middle_name", middle_name);
+                        data.put("last_name", last_name);
+                        data.put("email", email);
+                        data.put("phone", mobile);
+
+                        data.put("gender", gender);
+                        data.put("department", department);
+
+                        registerUser(data);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    System.out.println("error in reg");
                 }
             }
         });
 
     }
 
-    String emailpattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+    String emailpattern = "[a-zA-Z0-9._-]+@sjbit.edu.in";
 
     public boolean isValid() {
-        Email.setErrorEnabled(false);
-        Email.setError("");
-        Fname.setErrorEnabled(false);
-        Fname.setError("");
         Username.setErrorEnabled(false);
         Username.setError("");
-        Pass.setErrorEnabled(false);
-        Pass.setError("");
-        Mobileno.setErrorEnabled(false);
-        Mobileno.setError("");
-        Gender.setErrorEnabled(false);
-        Gender.setError("");
+        Pass1.setErrorEnabled(false);
+        Pass1.setError("");
+        Pass2.setErrorEnabled(false);
+        Pass2.setError("");
+        First_name.setErrorEnabled(false);
+        First_name.setError("");
+        Last_name.setErrorEnabled(false);
+        Last_name.setError("");
+        Email.setErrorEnabled(false);
+        Email.setError("");
+//        Gender.setErrorEnabled(false);
+//        Gender.setError("");
+//        Department.setErrorEnabled(false);
+//        Department.setError("");
+        Mobile.setErrorEnabled(false);
+        Mobile.setError("");
 
         boolean isValidName = false, isValidEmail = false, isValidPassword = false;
-        boolean isValidMobileNo = false, isValidGender = false, isValidUsername = false;
+        boolean isValidMobile = false, isValidUsername = false;
 
-        if (TextUtils.isEmpty(fname)) {
-            Fname.setErrorEnabled(true);
-            Fname.setError("Full Name is required");
+        if (TextUtils.isEmpty(username)) {
+            Username.setErrorEnabled(true);
+            Username.setError("Username cannot be empty");
+        } else {
+            isValidUsername = true;
+        }
+        if (TextUtils.isEmpty(pass1)) {
+            Pass1.setErrorEnabled(true);
+            Pass1.setError("Password is required");
+        } else {
+            if (pass1.length() < 6) {
+                Pass1.setErrorEnabled(true);
+                Pass1.setError("Password is too weak");
+            } else {
+                isValidPassword = true;
+            }
+        }
+        if (TextUtils.isEmpty(pass2)) {
+            Pass2.setErrorEnabled(true);
+            Pass2.setError("Password is required");
+        } else {
+            if (Pass1.equals(Pass2)) {
+                Pass2.setErrorEnabled(true);
+                Pass2.setError("Password not same");
+            } else {
+                isValidPassword = true;
+            }
+        }
+        if (TextUtils.isEmpty(first_name)) {
+            First_name.setErrorEnabled(true);
+            First_name.setError("First Name is required");
+        } else {
+            isValidName = true;
+        }
+        if (TextUtils.isEmpty(last_name)) {
+            Last_name.setErrorEnabled(true);
+            Last_name.setError("Last Name is required");
         } else {
             isValidName = true;
         }
@@ -149,83 +199,54 @@ public class Registration extends AppCompatActivity {
                 Email.setError("Enter a valid Email Address");
             }
         }
-        if (TextUtils.isEmpty(pass)) {
-            Pass.setErrorEnabled(true);
-            Pass.setError("Password is required");
+        if (TextUtils.isEmpty(mobile)) {
+            Mobile.setErrorEnabled(true);
+            Mobile.setError("Mobile number is required");
         } else {
-            if (pass.length() < 6) {
-                Pass.setErrorEnabled(true);
-                Pass.setError("password is too weak");
+            if (mobile.length() < 10) {
+                Mobile.setErrorEnabled(true);
+                Mobile.setError("Invalid mobile number");
             } else {
-                isValidPassword = true;
+                isValidMobile = true;
             }
         }
-        if (TextUtils.isEmpty(mobileno)) {
-            Mobileno.setErrorEnabled(true);
-            Mobileno.setError("Mobile number is required");
-        } else {
-            if (mobileno.length() < 10) {
-                Mobileno.setErrorEnabled(true);
-                Mobileno.setError("Invalid mobile number");
-            } else {
-                isValidMobileNo = true;
-            }
-        }
-        if (TextUtils.isEmpty(gender)) {
-            Gender.setErrorEnabled(true);
-            Gender.setError("Field cannot be empty");
-        } else {
-            isValidGender = true;
-        }
-        if (TextUtils.isEmpty(username)) {
-            Username.setErrorEnabled(true);
-            Username.setError("Field cannot be empty");
-        } else {
-            isValidUsername = true;
-        }
-        boolean  is_valid = isValidName && isValidEmail && isValidPassword && isValidMobileNo && isValidGender && isValidUsername;
-        return is_valid;
+
+//        if (TextUtils.isEmpty(gender)) {
+//            Gender.setErrorEnabled(true);
+//            Gender.setError("Field cannot be empty");
+//        } else {
+//            isValidGender = true;
+//        }
+
+        return isValidName && isValidEmail && isValidPassword && isValidMobile && isValidUsername;
     }
 
-    //******************************FUNCTIONS TO ADD DATA'S TO FIREBASE*************************
-    public void addUsers(String Discription, String FullName, String Username, String Website) {
+    public void registerUser(JSONObject userDetails) {
 
-//        Users user = new Users(
-//                Discription,
-//                "0",
-//                "0",
-//                FullName,
-//                "0",
-//                "https://firebasestorage.googleapis.com/v0/b/instagram-clone-291e7.appspot.com/o/generalProfilePhoto%2Fdefualt_insta_pic.png?alt=media&token=e9834979-a141-48fd-87b6-a2074e7dbc9b",
-//                Username,
-//                Website,
-//                userid
-//        );
-//        databaseReference.child("Users").child(useridd).setValue(user);
+        SharedPreferences storage = getSharedPreferences("College_Forum", MODE_PRIVATE);
+        String auth_token = storage.getString("auth_token", "No token");
+
+        AndroidNetworking.post("http://192.168.40.254:8000/api/auth/register")
+                .addHeaders("Authorization", auth_token)
+                .addBodyParameter("data", String.valueOf(userDetails))
+                .setContentType("application/json")
+                .setPriority(Priority.LOW)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Intent z = new Intent(Registration.this, Login.class);
+                        startActivity(z);
+                        finish();
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        System.out.println("\n\nerror while creating post " + anError.getErrorBody());
+                    }
+                });
     }
 
-    public void addPrivateDetails(String user_id, String email, String gender, String birthdate, String phoneNumber) {
-
-        privatedetails details = new privatedetails(
-                user_id,
-                email,
-                gender,
-                birthdate,
-                phoneNumber
-        );
-//        databaseReference.child("Privatedetails").child(useridd).setValue(details);
-    }
-
-    public void addPasswords(String passwords) {
-
-        Passwords pass = new Passwords(passwords);
-//        databaseReference.child("Passwords").child(useridd).setValue(pass);
-
-    }
-//*******************************************************************************
-
-    //******************************BACKGROUND ANIMATION*************************
-    // Starting animation:- start the animation on onResume.
     @Override
     protected void onResume() {
         super.onResume();
@@ -233,13 +254,11 @@ public class Registration extends AppCompatActivity {
             anim.start();
     }
 
-    // Stopping animation:- stop the animation on onPause.
     @Override
     protected void onPause() {
         super.onPause();
         if (anim != null && anim.isRunning())
             anim.stop();
     }
-//****************************************************************************
 
 }

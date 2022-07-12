@@ -133,7 +133,10 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Posts> {
             holder.likes.setText("Liked by you, " + likes.get(0).getFull_name() + " and " + (likes.size() - 2) + " others.");
             holder.like_btn.setText("Liked");
         } else {
-            holder.likes.setText("Liked by " + likes.get(0).getFull_name() + " and " + (likes.size() - 1) + " others.");
+            if(!likes.isEmpty())
+                holder.likes.setText("Liked by " + likes.get(0).getFull_name() + " and " + (likes.size() - 1) + " others.");
+            else
+                holder.likes.setText("Be the first to like the post.");
         }
 
         //set like button
