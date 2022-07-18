@@ -1,7 +1,6 @@
 package com.example.college_forum_app.models;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Posts {
 
@@ -97,6 +96,14 @@ public class Posts {
 
     public ArrayList<String> getImage_urls() {
         return this.image_urls;
+    }
+
+    public void addLike(Likes new_like){
+        this.likes.add(new_like);
+    }
+
+    public void removeLike(Likes newLike){
+        this.likes.removeIf(like -> like.getUser_id().equals(newLike.getUser_id()));
     }
 
 }

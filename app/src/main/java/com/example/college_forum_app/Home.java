@@ -2,6 +2,7 @@ package com.example.college_forum_app;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -11,10 +12,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
 import com.example.college_forum_app.Post.PostActivity;
 import com.example.college_forum_app.home.HomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jacksonandroidnetworking.JacksonParserFactory;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Home extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -28,10 +35,52 @@ public class Home extends AppCompatActivity implements BottomNavigationView.OnNa
         AndroidNetworking.setParserFactory(new JacksonParserFactory());
 
         navigationView.setOnNavigationItemSelectedListener(this);
-        String name = getIntent().getStringExtra("PAGE");
+
+        loadUserDetails();
 
         loadFragment(new HomeFragment());
+    }
 
+    private void loadUserDetails() {
+        SharedPreferences storage = getSharedPreferences("College_Forum", MODE_PRIVATE);
+        String auth_token = storage.getString("auth_token", "No token");
+
+        AndroidNetworking.get("http://192.168.40.254:8000/api/auth/user/")
+                .addHeaders("Authorization", auth_token)
+                .setPriority(Priority.LOW)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("College_Forum", MODE_PRIVATE);
+                        SharedPreferences.Editor myEdit = sharedPreferences.edit();
+                        try {
+                            myEdit.putString("user_id", response.get("id").toString());
+                            myEdit.putString("username", response.get("username").toString());
+                            myEdit.putString("full_name", response.get("full_name").toString());
+                            myEdit.putString("user_image", response.get("user_image").toString());
+                            myEdit.apply();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("College_Forum", MODE_PRIVATE);
+                        SharedPreferences.Editor myEdit = sharedPreferences.edit();
+
+                        myEdit.putString("auth_token", "");
+                        myEdit.apply();
+
+                        Intent z = new Intent(Home.this, Login.class);
+                        startActivity(z);
+                        finish();
+                    }
+                });
     }
 
     private boolean loadFragment(Fragment fragment) {

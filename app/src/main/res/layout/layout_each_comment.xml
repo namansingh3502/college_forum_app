@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="98dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="10dp"
+        android:paddingRight="5dp"
+        android:weightSum="100">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/user_img"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_weight="10"
+            android:src="@drawable/defualt_insta_pic"
+            app:civ_border_color="@color/darkgray"
+            app:civ_border_width="0.5dp" />
+
+
+        <LinearLayout
+            android:layout_width="331dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="10dp"
+            android:layout_weight="10"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="247dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:text="Username"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/comment_posted"
+                android:layout_width="321dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Comment"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,7 +1,9 @@
 package com.example.college_forum_app.Utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -10,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -22,63 +23,39 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.example.college_forum_app.Profile.ViewComments;
+import com.example.college_forum_app.R;
 import com.example.college_forum_app.models.Likes;
 import com.example.college_forum_app.models.Posts;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.example.college_forum_app.models.Users;
 import com.nostra13.universalimageloader.core.ImageLoader;
+
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-//import com.example.college_forum_app.Profile.ViewComments;
-import com.example.college_forum_app.R;
-import com.example.college_forum_app.models.Photo;
-import com.example.college_forum_app.models.Users;
-
-import org.json.JSONObject;
 
 public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Posts> {
 
-    public interface OnLoadMoreItemsListener {
-        void onLoadMoreItems();
-    }
-
-    OnLoadMoreItemsListener mOnLoadMoreItemsListener;
-
     private static final String TAG = "HomePostViewListAdapter";
-
+    OnLoadMoreItemsListener mOnLoadMoreItemsListener;
     private LayoutInflater mInflater;
     private int mLayoutResource;
     private Context mContext;
     private String currentUsername = "";
     private ProgressBar mProgressBar;
+    private boolean likeByCurrentUser = false;
 
     public HomeFragmentPostViewListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull ArrayList<Posts> objects) {
         super(context, resource, objects);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mLayoutResource = resource;
         this.mContext = context;
-    }
-
-    static class ViewHolder {
-        CircleImageView mprofileImage;
-        String likesString = "";
-        TextView username, timeDetla, body, likes, comments, mTags;
-        SquareImageView image;
-        Button like_btn, comment_btn;
-
-        Users settings = new Users();
-        boolean likeByCurrentUser = false;
-        Heart heart;
-        GestureDetector detector;
-        Photo photo;
     }
 
     @NonNull
@@ -111,125 +88,139 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Posts> {
             holder = (ViewHolder) convertView.getTag();
         }
 
+        //set the profile name
+        holder.username.setText(getItem(position).getUser().getFull_name());
+
         //set the profile image
         final ImageLoader imageLoader = ImageLoader.getInstance();
         imageLoader.displayImage(getItem(position).getUser().getUser_image(), holder.mprofileImage);
 
-        //set post text
-        holder.username.setText(getItem(position).getUser().getFull_name());
-        if (getItem(position).getBody().isEmpty())
-            holder.body.setVisibility(View.GONE);
-        else if (getItem(position).getIs_edited())
-            holder.body.setText("Edited : \n\n" + getItem(position).getBody());
-        else
-            holder.body.setText(getItem(position).getBody());
-
         //set post tags
         holder.mTags.setText(getItem(position).getPosted_in_string());
 
+        //set post text
+        if (getItem(position).getBody().isEmpty())
+            holder.body.setVisibility(View.GONE);
+        holder.body.setText(
+                (getItem(position).getIs_edited() ? "Edited : \n\n" : "")
+                        + getItem(position).getBody()
+        );
+
         //set likes string
-        ArrayList<Likes> likes = getItem(position).getLikes();
-        if (holder.likeByCurrentUser) {
-            holder.likes.setText("Liked by you, " + likes.get(0).getFull_name() + " and " + (likes.size() - 2) + " others.");
-            holder.like_btn.setText("Liked");
-        } else {
-            if(!likes.isEmpty())
-                holder.likes.setText("Liked by " + likes.get(0).getFull_name() + " and " + (likes.size() - 1) + " others.");
-            else
-                holder.likes.setText("Be the first to like the post.");
-        }
+        holder.likes.setText(setLikeString(getItem(position).getLikes()));
+
+        //set like buttoon text
+        holder.like_btn.setText(likeByCurrentUser ? "Liked" : "Like");
 
         //set like button
         holder.like_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 System.out.println("\n\npost id " + getItem(position).getId());
-                final String[] str = {new String()};
+
                 ArrayList<Likes> likes = getItem(position).getLikes();
 
                 SharedPreferences storage = mContext.getSharedPreferences("College_Forum", mContext.MODE_PRIVATE);
                 String auth_token = storage.getString("auth_token", "No token");
-                String like_url = "http://192.168.40.254:8000/api/forum/" + getItem(position).getId() + "/like_post";
+                String user_full_name = storage.getString("full_name", "No user");
+                Integer user_id = Integer.parseInt(storage.getString("user_id", "No user"));
 
-                if (holder.likeByCurrentUser) {
-                    AndroidNetworking.post(like_url)
-                            .addHeaders("Authorization", auth_token)
-                            .setPriority(Priority.LOW)
-                            .build()
-                            .getAsJSONObject(new JSONObjectRequestListener() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    str[0] = "Liked by " + likes.get(0).getFull_name() + " and " + (likes.size() - 1) + " others.";
-                                    holder.likes.setText(str[0]);
-                                    holder.like_btn.setText("Like");
-                                    holder.likeByCurrentUser = false;
-                                }
+                String update_like_url = "http://192.168.40.254:8000/api/forum/" + getItem(position).getId() + "/like_post";
 
-                                @Override
-                                public void onError(ANError anError) {
-                                    System.out.println("\n\nError while updating like");
-                                }
-                            });
-                } else {
-                    AndroidNetworking.post(like_url)
-                            .addHeaders("Authorization", auth_token)
-                            .setPriority(Priority.LOW)
-                            .build()
-                            .getAsJSONObject(new JSONObjectRequestListener() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    str[0] = "Liked by you, " + likes.get(0).getFull_name() + " and " + (likes.size() - 1) + " others.";
-                                    holder.likes.setText(str[0]);
-                                    holder.like_btn.setText("Liked");
-                                    holder.likeByCurrentUser = true;
-                                }
+                AndroidNetworking.post(update_like_url)
+                        .addHeaders("Authorization", auth_token)
+                        .setPriority(Priority.LOW)
+                        .build()
+                        .getAsJSONObject(new JSONObjectRequestListener() {
+                            @Override
+                            public void onResponse(JSONObject response) {
 
-                                @Override
-                                public void onError(ANError anError) {
-                                    System.out.println("\n\nError while updating like");
+                                Likes current_user = new Likes(user_full_name, user_id);
+
+                                System.out.println("\n\nlike counts " + likes.size() + " " + likeByCurrentUser);
+
+                                if (likeByCurrentUser) {
+                                    getItem(position).removeLike(current_user);
+                                } else {
+                                    getItem(position).addLike(current_user);
                                 }
-                            });
-                }
+                                likeByCurrentUser = !likeByCurrentUser;
+
+                                System.out.println("\n\nlike counts " + likes.size() + " " + likeByCurrentUser);
+
+                                holder.like_btn.setText(likeByCurrentUser ? "Liked" : "Like");
+                                holder.likes.setText(setLikeString(getItem(position).getLikes()));
+
+                            }
+
+                            @Override
+                            public void onError(ANError anError) {
+                                System.out.println("\n\nError while updating like");
+                            }
+                        });
             }
         });
 
-
-//        holder.image.setVisibility(View.INVISIBLE);
-
-
         //set the comment
-//        final List<Comments> comments = getItem(position).getComments();
-//        holder.comments.setText("View all " + comments.size() + " comments");
-//        holder.comments.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.d(TAG, "onClick: loading comment thread for " + getItem(position).getPhoto_id());
-//                Intent b = new Intent(mContext, ViewComments.class);
-//                //Create the bundle
-//                Bundle bundle = new Bundle();
-//                //Add your data from getFactualResults method to bundle
-//                bundle.putParcelable("Photo", getItem(position));
-//                b.putExtra("commentcount",comments.size());
-//                //Add the bundle to the intent
-//                b.putExtras(bundle);
-//                mContext.startActivity(b);
-//
-//            }
-//        });
+        holder.comment_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent b = new Intent(mContext, ViewComments.class);
+                b.putExtra("post_id", getItem(position).getId());
+                mContext.startActivity(b);
 
-/*        set the time it was posted
-        String timestampDifference = getTimestampDifference(getItem(position));
-        if(!timestampDifference.equals("0")){
-            holder.timeDetla.setText(timestampDifference + " DAYS AGO");
-        }else{
-            holder.timeDetla.setText("TODAY");
-        }*/
+            }
+        });
 
         if (reachedEndOfList(position)) {
             loadMoreData();
         }
 
         return convertView;
+    }
+
+    private String setLikeString(ArrayList<Likes> likes) {
+        SharedPreferences storage = getContext().getSharedPreferences("College_Forum", Context.MODE_PRIVATE);
+        String user_id = storage.getString("user_id", "No user");
+
+        //if post has likes then check if it is liked by current user else mark false
+        if (likes.size() > 0) {
+            likeByCurrentUser = checkLikedByCurrentUser(likes, user_id);
+            StringBuilder likeString = new StringBuilder("Liked by ");
+
+            if (likeByCurrentUser) likeString.append("you");
+
+            if (likes.size() > 1) {
+                if (!likeByCurrentUser) {
+                    likeString.append(likes.get(0).getFull_name());
+                } else if (likeByCurrentUser && user_id.equals(likes.get(0).getUser_id().toString())) {
+                    likeString.append(", " + likes.get(1).getFull_name());
+                } else if (likeByCurrentUser && !user_id.equals(likes.get(0).getUser_id().toString())) {
+                    likeString.append(", " + likes.get(0).getFull_name());
+                }
+            }
+
+            if (likes.size() > 2) {
+                if (likeByCurrentUser) {
+                    likeString.append(" and " + (likes.size() - 2) + " other.");
+                } else {
+                    likeString.append(" and " + (likes.size() - 1) + " other.");
+                }
+            }
+
+            return likeString.toString();
+        } else {
+            likeByCurrentUser = false;
+            return "Be the first to like.";
+        }
+    }
+
+    private boolean checkLikedByCurrentUser(ArrayList<Likes> likes, String user_id) {
+        for (Likes like : likes)
+            if (user_id.equals(like.getUser_id().toString()))
+                return true;
+
+        return false;
     }
 
     private boolean reachedEndOfList(int position) {
@@ -251,6 +242,24 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Posts> {
         }
     }
 
+
+
+    public interface OnLoadMoreItemsListener {
+        void onLoadMoreItems();
+    }
+
+    static class ViewHolder {
+        CircleImageView mprofileImage;
+        String likesString = "";
+        TextView username, timeDetla, body, likes, comments, mTags;
+        SquareImageView image;
+        Button like_btn, comment_btn;
+
+        Users settings = new Users();
+        Heart heart;
+        GestureDetector detector;
+    }
+
     public class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
         ViewHolder mHolder;
@@ -264,89 +273,6 @@ public class HomeFragmentPostViewListAdapter extends ArrayAdapter<Posts> {
             return true;
         }
 
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
-            Log.d(TAG, "onSingleTapConfirmed: Singletap detected.");
-
-/*            DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-            Query query = reference
-                    .child("Photo")
-                    .child(mHolder.photo.getPhoto_id())
-                    .child("likes");
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-
-                        String keyID = singleSnapshot.getKey();
-
-                        //case1: Then user already liked the photo
-                        if(mHolder.likeByCurrentUser &&
-                                singleSnapshot.getValue(Likes.class).getFull_name()
-                                        .equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
-
-                            mReference.child("Photo")
-                                    .child(mHolder.photo.getPhoto_id())
-                                    .child("likes")
-                                    .child(keyID)
-                                    .removeValue();
-///
-                            mReference.child("User_Photo")
-                                    .child(mHolder.photo.getUser_id())
-                                    .child(mHolder.photo.getPhoto_id())
-                                    .child("likes")
-                                    .child(keyID)
-                                    .removeValue();
-
-                            mHolder.heart.toggleLike();
-                            getLikesString(mHolder);
-                        }
-                        //case2: The user has not liked the photo
-                        else if(!mHolder.likeByCurrentUser){
-                            //add new like
-                            addNewLike(mHolder);
-                            break;
-                        }
-                    }
-                    if(!dataSnapshot.exists()){
-                        //add new like
-                        addNewLike(mHolder);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });*/
-
-            return true;
-        }
-    }
-
-    /**
-     * Returns a string representing the number of days ago the post was made
-     *
-     * @return
-     */
-    private String getTimestampDifference(Photo photo) {
-        Log.d(TAG, "getTimestampDifference: getting timestamp difference.");
-
-        String difference = "";
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date today = c.getTime();
-        sdf.format(today);
-        Date timestamp;
-        final String photoTimestamp = photo.getDate_Created();
-        try {
-            timestamp = sdf.parse(photoTimestamp);
-            difference = String.valueOf(Math.round(((today.getTime() - timestamp.getTime()) / 1000 / 60 / 60 / 24)));
-        } catch (ParseException e) {
-            Log.e(TAG, "getTimestampDifference: ParseException: " + e.getMessage());
-            difference = "0";
-        }
-        return difference;
     }
 
 }

@@ -13,6 +13,9 @@ public class Likes {
     public Likes() {
     }
 
+    public Likes(String user_full_name, String user_id) {
+    }
+
     public String getFull_name() {
         return full_name;
     }

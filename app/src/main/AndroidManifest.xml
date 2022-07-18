@@ -23,6 +23,7 @@
         <activity android:name=".Login" />
         <activity android:name=".Post.PostActivity" />
         <activity android:name=".Profile.Account_Settings" />
+        <activity android:name=".Profile.ViewComments" />
         <activity
             android:name=".Home"
             android:windowSoftInputMode="adjustPan" />
